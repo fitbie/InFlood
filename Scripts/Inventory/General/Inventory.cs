@@ -7,7 +7,7 @@ namespace Inventory
 
 public class Inventory : MonoBehaviour
 {
-    [SerializeField] private List<InventorySlot> inventorySlots = new List<InventorySlot>();
+    [field:SerializeField] public List<InventorySlot> InventorySlots { get; private set; } = new List<InventorySlot>();
 
     #region Callbacks
 
@@ -22,15 +22,16 @@ public class Inventory : MonoBehaviour
     public void AddItem(InventoryItem item, int amount)
     {
         var (contained, index) = ContainsItemWhere(item);
-        InventorySlot currentSlot = inventorySlots[index];
+        InventorySlot currentSlot;
         if (contained)
         {
+            currentSlot = InventorySlots[index];
             currentSlot.AddAmount(amount);
         }
         else
         {
             currentSlot = new InventorySlot(item, amount);
-            inventorySlots.Add(currentSlot);
+            InventorySlots.Add(currentSlot);
         }
 
         itemAdded?.Invoke(currentSlot, amount);
@@ -43,9 +44,9 @@ public class Inventory : MonoBehaviour
     /// <returns></returns>
     private (bool, int) ContainsItemWhere(InventoryItem item)
     {
-        for (int i = 0; i < inventorySlots.Count; i++)
+        for (int i = 0; i < InventorySlots.Count; i++)
         {
-            if (inventorySlots[i].Item == item) { return (true, i); }
+            if (InventorySlots[i].Item == item) { return (true, i); }
         }
 
         return (false, 0);
@@ -59,34 +60,39 @@ public class Inventory : MonoBehaviour
     /// <returns></returns>
     public bool ContainsItem(InventoryItem item)
     {
-        for (int i = 0; i < inventorySlots.Count; i++)
+        for (int i = 0; i < InventorySlots.Count; i++)
         {
-            if (inventorySlots[i].Item == item) { return true; }
+            if (InventorySlots[i].Item == item) { return true; }
         }
 
         return false;
     }
 
 
-    public void RemoveItem(InventoryItem item, int amount)
+    public bool RemoveItem(InventoryItem item, int amount) // True - successed removing, false - failed.
     {
         var (contained, index) = ContainsItemWhere(item);
-        var currentSlot = inventorySlots[index];
+        InventorySlot currentSlot = InventorySlots[index];
 
         if (contained && currentSlot.Amount > amount)
         {
-            inventorySlots[index].RemoveAmount(amount);
-
+            InventorySlots[index].RemoveAmount(amount);
             itemRemovedSucces?.Invoke(currentSlot, amount);
+
+            return true;
         }
         else if (currentSlot.Amount == amount)
         {
-            inventorySlots.Remove(currentSlot);
+            InventorySlots.Remove(currentSlot);
             itemRemovedSucces?.Invoke(currentSlot, amount);
+
+            return true;
         }
         else
         {
             itemRemovedFail?.Invoke();
+
+            return false;
         }
     }
 }
