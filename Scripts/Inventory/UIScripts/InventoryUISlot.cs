@@ -15,16 +15,14 @@ public class InventoryUISlot : MonoBehaviour
     [SerializeField] private Image bg; // Image behind item.
     [SerializeField] private TMP_Text amount;
 
-    [SerializeField] private RarityColors rarityColors;
 
 
-
-    public void BuildSlot(InventorySlot itemData)
+    public virtual void BuildSlot(InventorySlot itemData)
     {
         itemIcon.sprite = itemData.Item.SmallIcon;
         amount.text = $"{itemData.Amount}";
 
-        bg.color = rarityColors.GetColorRarity(itemData.Item.Rarity);
+        bg.color = itemData.Item.TypeColor;
     }
 
 }
