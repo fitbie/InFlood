@@ -2,7 +2,9 @@ using UnityEngine;
 
 
 
-[CreateAssetMenu(fileName = "RarityColors", menuName = "Inventory/Rarity Colors")]
+/// <summary>
+/// Old class for rarity colors. Not used for now.
+/// </summary>
 public class RarityColors : ScriptableObject
 {
     [SerializeField]
