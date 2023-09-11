@@ -11,9 +11,10 @@ public class Inventory : MonoBehaviour
 
     #region Callbacks
 
-    public Action<InventorySlot, int> itemAdded;
-    public Action<InventorySlot, int> itemRemovedSucces;
-    public Action itemRemovedFail;
+    public event Action<InventorySlot, int> ItemAmountAdded;
+    public event Action<InventorySlot, int> ItemAmountRemoved;
+    public event Action<InventorySlot> ItemDestroyed;
+    public event Action ItemRemovedFail;
 
     #endregion
 
@@ -34,7 +35,7 @@ public class Inventory : MonoBehaviour
             InventorySlots.Add(currentSlot);
         }
 
-        itemAdded?.Invoke(currentSlot, amount);
+        ItemAmountAdded?.Invoke(currentSlot, amount);
     }
 
     /// <summary>
@@ -77,20 +78,20 @@ public class Inventory : MonoBehaviour
         if (contained && currentSlot.Amount > amount)
         {
             InventorySlots[index].RemoveAmount(amount);
-            itemRemovedSucces?.Invoke(currentSlot, amount);
+            ItemAmountRemoved?.Invoke(currentSlot, amount);
 
             return true;
         }
         else if (currentSlot.Amount == amount)
         {
             InventorySlots.Remove(currentSlot);
-            itemRemovedSucces?.Invoke(currentSlot, amount);
+            ItemDestroyed?.Invoke(currentSlot);
 
             return true;
         }
         else
         {
-            itemRemovedFail?.Invoke();
+            ItemRemovedFail?.Invoke();
 
             return false;
         }
