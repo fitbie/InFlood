@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Inventory
@@ -24,12 +25,12 @@ public class Inventory : MonoBehaviour
     {
         var (contained, index) = ContainsItemWhere(item);
         InventorySlot currentSlot;
-        if (contained)
+        if (contained) // Add amount
         {
             currentSlot = InventorySlots[index];
             currentSlot.AddAmount(amount);
         }
-        else
+        else // Add new slot
         {
             currentSlot = new InventorySlot(item, amount);
             InventorySlots.Add(currentSlot);
@@ -55,7 +56,7 @@ public class Inventory : MonoBehaviour
     
 
     /// <summary>
-    /// Return true if inventory contain such item.
+    /// Return true if inventory contains item.
     /// </summary>
     /// <param name="item">Item to check</param>
     /// <returns></returns>
@@ -75,54 +76,28 @@ public class Inventory : MonoBehaviour
         var (contained, index) = ContainsItemWhere(item);
         InventorySlot currentSlot = InventorySlots[index];
 
-        if (contained && currentSlot.Amount > amount)
+        if (contained && currentSlot.Amount > amount) // Decrease amount
         {
             InventorySlots[index].RemoveAmount(amount);
             ItemAmountRemoved?.Invoke(currentSlot, amount);
 
             return true;
         }
-        else if (currentSlot.Amount == amount)
+        else if (currentSlot.Amount == amount) //Destroy slot
         {
             InventorySlots.Remove(currentSlot);
-            ItemDestroyed?.Invoke(currentSlot);
 
+            ItemDestroyed?.Invoke(currentSlot);
             return true;
         }
-        else
+        else // Failed
         {
             ItemRemovedFail?.Invoke();
 
             return false;
         }
     }
-}
-
-
-
-
-[Serializable]
-public class InventorySlot
-{
-    [field:SerializeField] public InventoryItem Item { get; private set; }
-    [field:SerializeField] public int Amount { get; private set; }
-
-    public InventorySlot(InventoryItem item, int amount)
-    {
-        Item = item;
-        Amount = amount;
-    }
-
-
-    public void AddAmount(int value)
-    {
-        Amount += value;
-    }
-
-    public void RemoveAmount(int value)
-    {
-        Amount -= value;
-    }
+    
 }
 
 }
