@@ -14,15 +14,27 @@ public class InventoryUISlot : MonoBehaviour
     [SerializeField] private Image itemIcon; // Item image.
     [SerializeField] private Image bg; // Image behind item.
     [SerializeField] private TMP_Text amount;
+    public InventorySlot SlotData { get; private set; }
 
 
 
     public virtual void BuildSlot(InventorySlot itemData)
     {
-        itemIcon.sprite = itemData.Item.SmallIcon;
-        amount.text = $"{itemData.Amount}";
+        SlotData = itemData;
 
-        bg.color = itemData.Item.TypeColor;
+        itemIcon.sprite = SlotData.Item.SmallIcon;
+        amount.text = $"{SlotData.Amount}";
+
+        bg.color = SlotData.Item.TypeColor;
+    }
+
+
+    public virtual void UpdateSlot()
+    {
+        itemIcon.sprite = SlotData.Item.SmallIcon;
+        amount.text = $"{SlotData.Amount}";
+
+        bg.color = SlotData.Item.TypeColor;  
     }
 
 }
