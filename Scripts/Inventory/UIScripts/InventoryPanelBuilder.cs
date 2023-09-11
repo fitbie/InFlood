@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Inventory
 {
@@ -10,8 +9,11 @@ namespace Inventory
 public class InventoryPanelBuilder : MonoBehaviour
 {
     [SerializeField] private Inventory inventory; // TODO : setup accessing to.
+    
     [SerializeField] private InventoryUISlot slotPrefab;
-    [SerializeField] private List<InventoryUISlot> currentSlots = new List<InventoryUISlot>();
+    [SerializeField] private Transform content; // Parent of slots with grid layout group.
+
+    private Dictionary<InventorySlot, InventoryUISlot> currentSlots = new Dictionary<InventorySlot, InventoryUISlot>();
 
 
 
@@ -27,21 +29,18 @@ public class InventoryPanelBuilder : MonoBehaviour
 
         inventory.ItemAmountAdded += UpdateUISlot;
         inventory.ItemAmountRemoved += UpdateUISlot;
+        inventory.ItemDestroyed += RemoveUISlot;
     }
 
 
     public void BuildPanel()
     {
-        Profiler.BeginSample("BuildPanel");
         var inventorySlots = GetSlots();
-        
-        var sortedSlots = SortSlotsByType(inventorySlots);
 
-        foreach(var inventorySlot in sortedSlots)
+        foreach(var inventorySlot in inventorySlots)
         {
             BuildUISlot(inventorySlot);
         }
-        Profiler.EndSample();
     }
 
 
@@ -52,41 +51,48 @@ public class InventoryPanelBuilder : MonoBehaviour
     }
 
 
-    private void BuildUISlot(InventorySlot inventorySlot) // Very first building
-    {
-        var slot = Instantiate(slotPrefab, transform);
-        slot.BuildSlot(inventorySlot);
-        currentSlots.Add(slot);
-    }
-
-
     /// <summary>
     /// Called when we modify inventory by adding / removing items. Avoid building / destroying slots every time. (GC optimization)
     /// </summary>
     private void UpdateUISlot(InventorySlot inventorySlot, int _)
-    {
-        Profiler.BeginSample("UpdateUISlot");
+    {        
         // Update if we have current item ui slot.
-        foreach (var uiSlot in currentSlots)
+        if (currentSlots.TryGetValue(inventorySlot, out var uiSlot))
         {
-            if (inventorySlot.Item == uiSlot.SlotData.Item) 
-            { 
-                uiSlot.UpdateSlot();
-                Profiler.EndSample();
-                return;
-            }    
+            uiSlot.UpdateSlot();
         }
-        
-        BuildUISlot(inventorySlot); // Else - build new.
-        Profiler.EndSample();
+
+        // Build new slot.
+        else 
+        {
+            BuildUISlot(inventorySlot);    
+        }
     }
 
 
+    private void BuildUISlot(InventorySlot inventorySlot) // Very first building
+    {
+        var slot = Instantiate(slotPrefab, content);
+        slot.BuildSlot(inventorySlot);
+        currentSlots.Add(inventorySlot, slot);
+        
+        SortChildrenByItemType();
+    }
 
 
-        #region TypeSorting
+    private void RemoveUISlot(InventorySlot inventorySlot)
+    {
+        currentSlots.Remove(inventorySlot, out var uiSlot);
+        Destroy(uiSlot.gameObject);
 
-        private List<Type> typeOrder = new List<Type>
+        SortChildrenByItemType();
+    }
+
+
+    #region TypeSorting
+
+    // Determines in which order the sorting will proceed. If we add new item typed - update this list.
+    private List<Type> typeOrder = new List<Type>
     {
         typeof(FoodItem),
         typeof(FuelItem),
@@ -94,18 +100,20 @@ public class InventoryPanelBuilder : MonoBehaviour
     };
 
 
-    private List<InventorySlot> SortSlotsByType(List<InventorySlot> inventorySlots)
+    public void SortChildrenByItemType()
     {
-        var groupedSlots = inventorySlots.GroupBy(slot => slot.Item.GetType());
-        var sortedSlots = groupedSlots.OrderBy(group => typeOrder.IndexOf(group.Key))
-        .SelectMany(group => group)
-        .ToList();
+        // Get all keys(InventorySlot) and order them using typeOrder.
+        var sortedKeys = currentSlots.Keys.OrderBy(key => typeOrder.IndexOf(key.Item.GetType()));
 
-        return sortedSlots;
+        // Move slots position accordong to sordedKeys
+        foreach (var key in sortedKeys)
+        {
+            var uiSlot = currentSlots[key];
+            uiSlot.transform.SetAsLastSibling();
+        }
     }
 
     #endregion
-
 }
 
 }
