@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Inventory
@@ -10,14 +9,7 @@ public class Inventory : MonoBehaviour
 {
     [field:SerializeField] public List<InventorySlot> InventorySlots { get; private set; } = new List<InventorySlot>();
 
-    #region Callbacks
-
-    public event Action<InventorySlot, int> ItemAmountAdded;
-    public event Action<InventorySlot, int> ItemAmountRemoved;
-    public event Action<InventorySlot> ItemDestroyed;
-    public event Action ItemRemovedFail;
-
-    #endregion
+    public event EventHandler InventoryChangedEventHandler; // Use InventoryEventArgs class below.
 
 
 
@@ -25,18 +17,21 @@ public class Inventory : MonoBehaviour
     {
         var (contained, index) = ContainsItemWhere(item);
         InventorySlot currentSlot;
+        int prevAmount = 0;
         if (contained) // Add amount
         {
             currentSlot = InventorySlots[index];
-            currentSlot.AddAmount(amount);
+            prevAmount = currentSlot.Amount; 
+            currentSlot.ChangeAmount(amount);
         }
         else // Add new slot
         {
             currentSlot = new InventorySlot(item, amount);
             InventorySlots.Add(currentSlot);
         }
-
-        ItemAmountAdded?.Invoke(currentSlot, amount);
+        
+        var inventoryEventArgs = new InventoryEventArgs(currentSlot, amount, currentSlot.Amount);
+        InventoryChangedEventHandler?.Invoke(this, inventoryEventArgs);
     }
 
     /// <summary>
@@ -71,33 +66,48 @@ public class Inventory : MonoBehaviour
     }
 
 
-    public bool RemoveItem(InventoryItem item, int amount) // True - successed removing, false - failed.
+    /// <summary>
+    /// Remove item from inventary. True if succes removing, false if failed (no item / too big amount).
+    /// </summary>
+    /// <param name="item">Item to remove</param>
+    /// <param name="amount">Amount to remove</param>
+    /// <returns></returns>
+    public bool RemoveItem(InventoryItem item, int amount)
     {
         var (contained, index) = ContainsItemWhere(item);
         InventorySlot currentSlot = InventorySlots[index];
 
-        if (contained && currentSlot.Amount > amount) // Decrease amount
-        {
-            InventorySlots[index].RemoveAmount(amount);
-            ItemAmountRemoved?.Invoke(currentSlot, amount);
+        if (!contained || currentSlot.Amount < amount) { return false; } // Failed removing.
 
-            return true;
-        }
-        else if (currentSlot.Amount == amount) //Destroy slot
-        {
-            InventorySlots.Remove(currentSlot);
+        amount = -amount; // We need to distract.
+        currentSlot.ChangeAmount(amount);
+        if (currentSlot.Amount == 0) { InventorySlots.Remove(currentSlot); }
+        
+        var inventoryEventArgs = new InventoryEventArgs(currentSlot, amount, currentSlot.Amount);
+        InventoryChangedEventHandler?.Invoke(this, inventoryEventArgs);
 
-            ItemDestroyed?.Invoke(currentSlot);
-            return true;
-        }
-        else // Failed
-        {
-            ItemRemovedFail?.Invoke();
-
-            return false;
-        }
+        return true;
     }
     
+}
+
+
+public class InventoryEventArgs : EventArgs
+{
+    public InventorySlot InventorySlot { get; }
+    public int AmountChanges { get; }
+    public int NewAmount { get; }
+    public bool Added { get; }
+    public bool Removed { get; }
+
+    public InventoryEventArgs(InventorySlot inventorySlot, int changedAmount, int newAmount)
+    {
+        InventorySlot = inventorySlot;
+        AmountChanges = changedAmount;
+        NewAmount = newAmount;
+        Added = (NewAmount == AmountChanges && AmountChanges != 0); // We added new item, so changes equale to new amount.
+        Removed = (NewAmount == 0 && AmountChanges != 0); // We removed item.
+    }
 }
 
 }
