@@ -17,14 +17,9 @@ public class InventorySlot
     }
 
 
-    public void AddAmount(int value)
+    public void ChangeAmount(int value)
     {
         Amount += value;
-    }
-
-    public void RemoveAmount(int value)
-    {
-        Amount -= value;
     }
 }
 
