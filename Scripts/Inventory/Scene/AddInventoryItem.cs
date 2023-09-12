@@ -8,7 +8,7 @@ namespace Inventory
 /// </summary>
 public class AddInventoryItem : MonoBehaviour
 {
-    [SerializeField] private InventoryItem item;
+    [SerializeField] private InventoryItem[] items;
     [SerializeField] private int amount;
     [SerializeField] private Inventory inventory; // TODO REFACTOR
 
@@ -16,13 +16,19 @@ public class AddInventoryItem : MonoBehaviour
 
     public void AddItem()
     {
-        inventory.AddItem(item, amount);
+        foreach (var item in items)
+        {
+            inventory.AddItem(item, amount);
+        }
     }
 
 
     public void RemoveItem()
     {
-        inventory.RemoveItem(item, amount);
+        foreach (var item in items)
+        {
+            inventory.RemoveItem(item, amount);
+        }
     }
 }
 
