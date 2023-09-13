@@ -17,6 +17,9 @@ public class InventoryUISlot : MonoBehaviour
     [SerializeField] private TMP_Text price;
     public InventorySlot SlotData { get; private set; }
 
+    public enum DisplayMode { Default, Price }
+    private DisplayMode mode;
+
 
 
     public virtual void BuildSlot(InventorySlot itemData)
@@ -39,11 +42,36 @@ public class InventoryUISlot : MonoBehaviour
     }
 
 
-    public void ShowPrice(bool state)
+    /// <summary>
+    /// How slot should be displayed - default, with price text, etc..
+    /// </summary>
+    public void DiplaySlot(DisplayMode displayMode)
+    {
+        switch (displayMode)
+        {
+            case DisplayMode.Default:
+            ShowDefaultSlot();
+            break;
+
+            case DisplayMode.Price:
+            ShowPriceSlot();
+            break;
+        }
+    }
+
+
+    public void ShowDefaultSlot()
+    {
+        GameObject priceGO = price.gameObject;
+        if (priceGO.activeSelf) priceGO.SetActive(false);
+    }
+
+
+    public void ShowPriceSlot()
     {
         var marketable = SlotData.Item as IMarketable;
-        if (state) { price.text = $"{marketable.RegPrice}"; }
-        price.gameObject.SetActive(state);
+        price.text = $"{marketable.RegPrice}";
+        price.gameObject.SetActive(true);
     }
 
 }
