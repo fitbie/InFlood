@@ -4,32 +4,25 @@ namespace Inventory
 {
 
 /// <summary>
-/// Temp class for testing, TODO REFACTOR
+/// Scene class for adding item.
 /// </summary>
+[AddComponentMenu("Inventory/Add Inventory Item")]
 public class AddInventoryItem : MonoBehaviour
 {
-    [SerializeField] private InventoryItem[] items;
-    [SerializeField] private int amount;
-    [SerializeField] private Inventory inventory; // TODO REFACTOR
+    [SerializeField] private Inventory inventory; // TODO GET REFERENCE
+    [SerializeField] private InventorySlot[] itemsToAdd;
 
 
 
-    public void AddItem()
+    public void AddItems()
     {
-        foreach (var item in items)
+        if (itemsToAdd.Length == 0) { return; }
+        foreach (var item in itemsToAdd)
         {
-            inventory.AddItem(item, amount);
+            inventory.AddItem(item.Item, item.Amount);
         }
     }
 
-
-    public void RemoveItem()
-    {
-        foreach (var item in items)
-        {
-            inventory.RemoveItem(item, amount);
-        }
-    }
 }
 
 }
