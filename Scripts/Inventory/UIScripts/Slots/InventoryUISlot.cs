@@ -18,7 +18,7 @@ public class InventoryUISlot : MonoBehaviour
     public InventorySlot SlotData { get; private set; }
 
     public enum DisplayMode { Default, Price }
-    private DisplayMode mode;
+    public DisplayMode CurrentDisplayMode { get; private set; }
 
 
 
@@ -64,6 +64,8 @@ public class InventoryUISlot : MonoBehaviour
     {
         GameObject priceGO = price.gameObject;
         if (priceGO.activeSelf) priceGO.SetActive(false);
+
+        CurrentDisplayMode = DisplayMode.Default;
     }
 
 
@@ -72,6 +74,8 @@ public class InventoryUISlot : MonoBehaviour
         var marketable = SlotData.Item as IMarketable;
         price.text = $"{marketable.RegPrice}";
         price.gameObject.SetActive(true);
+
+        CurrentDisplayMode = DisplayMode.Price;
     }
 
 }
