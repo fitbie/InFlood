@@ -1,17 +1,17 @@
 using System;
-using Inventory;
+using InventorySystem;
 using UnityEngine;
 
 public class InventoryTabsController : MonoBehaviour
 {
-    [field:SerializeField] public InventoryPanelBuilder InventoryPanel { get; private set; } // TODO getting acces.
+    [field:SerializeField] public InventoryPanelBuilder InventoryPanel { get; set; } // TODO getting acces.
 
     public enum TabType { OnBoard, Sell, Buy, Quest }
     private TabType currentTab;
 
 
 
-    private void Awake()
+    private void Start()
     {
         InventoryPanel.Inventory.InventoryChangedEventHandler += UpdateTab;
     }
@@ -55,6 +55,7 @@ public class InventoryTabsController : MonoBehaviour
 
     public void OpenSellTab()
     {
+        //TODO : Selling
         SellTab.ShowSellSlots(InventoryPanel);
         currentTab = TabType.Sell;
     }
@@ -62,7 +63,7 @@ public class InventoryTabsController : MonoBehaviour
 
     public void OpenBuyTab()
     {
-        //TODO : Selling
+        
         currentTab = TabType.Buy;
     }
 
