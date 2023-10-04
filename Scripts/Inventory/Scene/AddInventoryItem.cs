@@ -1,6 +1,12 @@
 using UnityEngine;
+using UnityEngine.Events;
+using InventorySystem;
 
-namespace Inventory
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace InventorySystem
 {
 
 /// <summary>
@@ -9,20 +15,77 @@ namespace Inventory
 [AddComponentMenu("Inventory/Add Inventory Item")]
 public class AddInventoryItem : MonoBehaviour
 {
-    [SerializeField] private Inventory inventory; // TODO GET REFERENCE
+    [SerializeField] private bool addToPlayerInventory = true;
+    [SerializeField] private Inventory inventory;
     [SerializeField] private InventorySlot[] itemsToAdd;
+    [SerializeField] private UnityEvent onAdd;
 
 
 
     public void AddItems()
     {
+        inventory = addToPlayerInventory ? GameManager.Instance.Player.Inventory : inventory;
+
         if (itemsToAdd.Length == 0) { return; }
         foreach (var item in itemsToAdd)
         {
             inventory.AddItem(item.Item, item.Amount);
         }
+
+        onAdd?.Invoke();
     }
 
 }
 
 }
+
+///----------------------------------------------------------------
+/// Editor Class
+///----------------------------------------------------------------
+ 
+#if UNITY_EDITOR
+[CustomEditor(typeof(AddInventoryItem))]
+public class AddInventoryItemEditor : Editor
+{
+    //All serialized properties
+   #region SerializedProperties
+
+    SerializedProperty addToPlayerInventory;
+    SerializedProperty inventory;
+    SerializedProperty itemsToAdd;
+    SerializedProperty onAdd;
+    
+   #endregion
+
+
+   private void OnEnable() //Find serialized properties and cash them
+   {
+        addToPlayerInventory = serializedObject.FindProperty("addToPlayerInventory");
+        inventory = serializedObject.FindProperty("inventory");
+
+         itemsToAdd = serializedObject.FindProperty("itemsToAdd");
+         onAdd = serializedObject.FindProperty("onAdd");
+   }
+
+   public override void OnInspectorGUI() 
+   {
+        serializedObject.Update();
+
+        EditorGUILayout.PropertyField(addToPlayerInventory);
+        if (!addToPlayerInventory.boolValue)
+        {
+            EditorGUILayout.PropertyField(inventory);
+        }
+
+        EditorGUILayout.Space(5); //Space between lines
+
+        EditorGUILayout.PropertyField(itemsToAdd);
+
+        EditorGUILayout.Space(5);
+
+        EditorGUILayout.PropertyField(onAdd);
+
+        serializedObject.ApplyModifiedProperties();
+   }
+}
+#endif
