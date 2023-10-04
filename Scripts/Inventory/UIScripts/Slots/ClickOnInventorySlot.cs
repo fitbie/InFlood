@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Inventory
+namespace InventorySystem
 {
 
 using DisplayMode = InventoryUISlot.DisplayMode;

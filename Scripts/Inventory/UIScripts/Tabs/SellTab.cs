@@ -1,4 +1,4 @@
-namespace Inventory
+namespace InventorySystem
 {
     
 using DisplayMode = InventoryUISlot.DisplayMode;

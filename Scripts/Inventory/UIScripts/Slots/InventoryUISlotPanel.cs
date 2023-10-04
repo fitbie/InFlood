@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Inventory
+namespace InventorySystem
 {
 
 public class InventoryUISlotPanel : MonoBehaviour, IDeselectHandler

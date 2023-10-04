@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Inventory
+namespace InventorySystem
 {
 
 [CreateAssetMenu(fileName = "QuestItem", menuName = "Inventory/QuestItem")]

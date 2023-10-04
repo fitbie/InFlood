@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-namespace Inventory
+namespace InventorySystem
 {
 
 /// <summary>
