@@ -1,16 +1,22 @@
-namespace Inventory
+namespace InventorySystem
 {
 
 public class PlayerInventoryPanel : InventoryPanelBuilder
 {
+    public InventoryTabsController tabsController;
 
-    private void Start() // TODO entry point.
+
+    public override void Initialize()
     {
-        Initialize();    
+        Inventory = GameManager.Instance.Player.Inventory;
+
+        tabsController.InventoryPanel = this;
+
+        base.Initialize();
     }
 
 
-    protected override void BuildUISlot(InventorySlot inventorySlot) // Very first building
+        protected override void BuildUISlot(InventorySlot inventorySlot) // Very first building
     {
         base.BuildUISlot(inventorySlot);
         
