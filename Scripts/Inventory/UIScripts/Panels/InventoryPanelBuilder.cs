@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Inventory
+namespace InventorySystem
 {
 
 /// <summary>
@@ -10,7 +10,7 @@ namespace Inventory
 /// </summary>
 public class InventoryPanelBuilder : MonoBehaviour
 {
-    [field:SerializeField] public Inventory Inventory { get; private set; }
+    [field:SerializeField] public Inventory Inventory { get; protected set; }
     
     [field:SerializeField] public InventoryUISlot SlotPrefab { get; private set; }
     [field:SerializeField] public Transform Content { get; private set; } // Parent of slots with grid layout group.
@@ -18,19 +18,22 @@ public class InventoryPanelBuilder : MonoBehaviour
     public Dictionary<InventorySlot, InventoryUISlot> CurrentSlots { get; private set; } = new Dictionary<InventorySlot, InventoryUISlot>();
 
 
+    private void Awake()
+    {
+        Initialize();    
+    }
+
 
     public virtual void Initialize()
     {
-        BuildPanel();
+        BuildPanel(GetSlots());
 
         Inventory.InventoryChangedEventHandler += UpdateUISlot;
     }
 
 
-    protected void BuildPanel() // First inventory building. Then use UpdateUISlot.
+    public void BuildPanel(List<InventorySlot> inventorySlots) // First inventory building. Then use UpdateUISlot.
     {
-        var inventorySlots = GetSlots();
-
         foreach(var inventorySlot in inventorySlots)
         {
             BuildUISlot(inventorySlot);
@@ -48,7 +51,7 @@ public class InventoryPanelBuilder : MonoBehaviour
     /// <summary>
     /// Called when we modify inventory by adding / removing items. Avoid building / destroying slots every time. (GC optimization).
     /// </summary>
-    private void UpdateUISlot(object sender, EventArgs e)
+    protected void UpdateUISlot(object sender, EventArgs e)
     {
         var changesData = e as InventoryEventArgs;
         InventorySlot inventorySlot = changesData.InventorySlot;
