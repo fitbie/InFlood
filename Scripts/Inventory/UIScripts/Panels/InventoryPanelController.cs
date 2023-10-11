@@ -8,14 +8,16 @@ namespace InventorySystem
 /// <summary>
 /// Base UI inventory panel class to derive from.
 /// </summary>
-public class InventoryPanelBuilder : MonoBehaviour
+public class InventoryPanelController : MonoBehaviour
 {
-    [field:SerializeField] public Inventory Inventory { get; protected set; }
+    [field:SerializeField] public Inventory Inventory { get; protected set; } // Need to get acces in children.
     
     [field:SerializeField] public InventoryUISlot SlotPrefab { get; private set; }
-    [field:SerializeField] public Transform Content { get; private set; } // Parent of slots with grid layout group.
+    [field:SerializeField] public Transform SlotContainer { get; private set; } // Parent of slots with grid layout group.
 
     public Dictionary<InventorySlot, InventoryUISlot> CurrentSlots { get; private set; } = new Dictionary<InventorySlot, InventoryUISlot>();
+
+    
 
 
     private void Awake()
@@ -26,32 +28,41 @@ public class InventoryPanelBuilder : MonoBehaviour
 
     public virtual void Initialize()
     {
-        BuildPanel(GetSlots());
+        BuildPanel(Inventory.InventorySlots);
 
         Inventory.InventoryChangedEventHandler += UpdateUISlot;
     }
 
 
-    public void BuildPanel(List<InventorySlot> inventorySlots) // First inventory building. Then use UpdateUISlot.
+    protected virtual void BuildPanel(List<InventorySlot> inventorySlots) // First inventory building. Then use UpdateUISlot.
     {
         foreach(var inventorySlot in inventorySlots)
         {
-            BuildUISlot(inventorySlot);
+            AddUISlot(inventorySlot, SlotContainer, out var uISlot);
         }
     }
 
 
-    protected virtual List<InventorySlot> GetSlots()
+    protected virtual void AddUISlot(InventorySlot slotData, Transform container, out InventoryUISlot addedSlot)
     {
-        List<InventorySlot> slots = Inventory.InventorySlots;
-        return slots;
+        var slot = Instantiate(SlotPrefab, container);
+        slot.BuildSlot(slotData);
+        addedSlot = slot;
+        CurrentSlots.Add(slotData, addedSlot);
+    }
+
+
+    protected virtual void RemoveUISlot(InventorySlot inventorySlot)
+    {
+        CurrentSlots.Remove(inventorySlot, out var uiSlot);
+        GameObject.Destroy(uiSlot.gameObject);
     }
 
 
     /// <summary>
     /// Called when we modify inventory by adding / removing items. Avoid building / destroying slots every time. (GC optimization).
     /// </summary>
-    protected void UpdateUISlot(object sender, EventArgs e)
+    protected virtual void UpdateUISlot(object sender, EventArgs e)
     {
         var changesData = e as InventoryEventArgs;
         InventorySlot inventorySlot = changesData.InventorySlot;
@@ -60,7 +71,7 @@ public class InventoryPanelBuilder : MonoBehaviour
 
         if (added)
         {
-            BuildUISlot(inventorySlot);
+            AddUISlot(inventorySlot, SlotContainer, out var _);
         }
 
         else if (removed)
@@ -75,19 +86,6 @@ public class InventoryPanelBuilder : MonoBehaviour
     }
 
 
-    protected virtual void BuildUISlot(InventorySlot inventorySlot)
-    {
-        var slot = Instantiate(SlotPrefab, Content);
-        slot.BuildSlot(inventorySlot);
-        CurrentSlots.Add(inventorySlot, slot);
-    }
-
-
-    protected virtual void RemoveUISlot(InventorySlot inventorySlot)
-    {
-        CurrentSlots.Remove(inventorySlot, out var uiSlot);
-        Destroy(uiSlot.gameObject);
-    }
 
 }
 
