@@ -4,73 +4,46 @@ using UnityEngine;
 
 public class InventoryTabsController : MonoBehaviour
 {
-    [field:SerializeField] public InventoryPanelBuilder InventoryPanel { get; set; } // TODO getting acces.
-
-    public enum TabType { OnBoard, Sell, Buy, Quest }
-    private TabType currentTab;
+    [field:SerializeField] public PlayerInventoryPanel PlayerInventoryPanel { get; set; } // Inspector.
+    [SerializeField] private InventoryTab defaultTab; // Open this tab by default.
+    public static InventoryTab currentTab { get; private set; }
 
 
 
     private void Start()
     {
-        InventoryPanel.Inventory.InventoryChangedEventHandler += UpdateTab;
+        InventoryTab.OnTabClick += OpenTab;
+        PlayerInventoryPanel.Inventory.InventoryChangedEventHandler += UpdateTab;
     }
 
 
     private void OnEnable() // Show OnBoard on opening.
     {
-        OpenOnBoardTab();    
+        OpenTab(defaultTab);
     }
 
 
     private void UpdateTab(object _, EventArgs __)
     {
-        switch (currentTab)
-        {
-            case TabType.OnBoard:
-            OpenOnBoardTab();
-            break;
-
-            case TabType.Sell:
-            OpenSellTab();
-            break;
-
-            case TabType.Buy:
-            OpenBuyTab();
-            break;
-
-            case TabType.Quest:
-            OpenQuestTab();
-            break;
-        }
+        currentTab.OpenTab(); // Refresh tab by opening it again.
     }
+    
 
-
-    public void OpenOnBoardTab()
+    public void OpenTab(InventoryTab tab)
     {
-        OnBoardTab.ShowOnBoardSlots(InventoryPanel);
-        currentTab = TabType.OnBoard;
-    }
-
-
-    public void OpenSellTab()
-    {
-        //TODO : Selling
-        SellTab.ShowSellSlots(InventoryPanel);
-        currentTab = TabType.Sell;
-    }
-
-
-    public void OpenBuyTab()
-    {
+        if (currentTab == tab) { return; }
+        if (currentTab == null) {currentTab = tab; }
         
-        currentTab = TabType.Buy;
+        currentTab.CloseTab();
+        tab.OpenTab();
+        currentTab = tab;
     }
 
 
-    public void OpenQuestTab()
+    private void OnDestroy()
     {
-        QuestTab.ShowQuestSlots(InventoryPanel);
-        currentTab = TabType.Quest;
+        InventoryTab.OnTabClick -= OpenTab;
+        PlayerInventoryPanel.Inventory.InventoryChangedEventHandler -= UpdateTab;    
     }
+
 }
