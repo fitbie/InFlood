@@ -1,24 +1,21 @@
+using UnityEngine;
+
 namespace InventorySystem
 {
 
-public class PlayerInventoryPanel : InventoryPanelBuilder
+public class PlayerInventoryPanel : InventoryPanelController
 {
-    public InventoryTabsController tabsController;
-
-
     public override void Initialize()
     {
         Inventory = GameManager.Instance.Player.Inventory;
-
-        tabsController.InventoryPanel = this;
 
         base.Initialize();
     }
 
 
-        protected override void BuildUISlot(InventorySlot inventorySlot) // Very first building
+    protected override void AddUISlot(InventorySlot slotData, Transform container, out InventoryUISlot addedSlot)
     {
-        base.BuildUISlot(inventorySlot);
+        base.AddUISlot(slotData, container, out addedSlot);
         
         InventoryUISlotsSorter.SortChildrenByItemType(CurrentSlots);
     }
