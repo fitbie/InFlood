@@ -18,8 +18,13 @@ public class AddInventoryItem : MonoBehaviour
     [SerializeField] private bool addToPlayerInventory = true;
     [SerializeField] private Inventory inventory;
     [SerializeField] private InventorySlot[] itemsToAdd;
+    public GameObject prefabToInstantiate;
     [SerializeField] private UnityEvent onAdd;
+    void Start(){
+        prefabToInstantiate = itemsToAdd[0].Item.ContainerPrefab;
+    }
 
+    // method to change items to add
 
 
     public void AddItems()
@@ -32,7 +37,14 @@ public class AddInventoryItem : MonoBehaviour
             inventory.AddItem(item.Item, item.Amount);
         }
 
+        FMODUnity.RuntimeManager.PlayOneShot("event:/UI/PickUpItem", transform.position);
+
         onAdd?.Invoke();
+    }
+
+    public void SetItems(InventorySlot[] newItemsToAdd){
+        itemsToAdd = newItemsToAdd;
+        GetComponentInChildren<LootCargoVisualSpawner>().ChangeLootPrefab(itemsToAdd[0].Item.ContainerPrefab);
     }
 
 }
@@ -52,6 +64,7 @@ public class AddInventoryItemEditor : Editor
 
     SerializedProperty addToPlayerInventory;
     SerializedProperty inventory;
+    SerializedProperty prefabToInstantiate;
     SerializedProperty itemsToAdd;
     SerializedProperty onAdd;
     
