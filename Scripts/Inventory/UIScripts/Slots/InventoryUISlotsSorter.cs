@@ -1,13 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace InventorySystem
 {
 
-public class InventoryUISlotsSorter : MonoBehaviour
+public class InventoryUISlotsSorter
 {
 
 
@@ -16,9 +14,12 @@ public class InventoryUISlotsSorter : MonoBehaviour
     // Determines in which order the sorting will proceed. If we add new item typed - update this list.
     private static List<Type> typeOrder = new List<Type>
     {
+        typeof(QuestItem),
         typeof(FoodItem),
         typeof(FuelItem),
         typeof(ScienceItem),
+        typeof(MaterialItem),
+        typeof(LuxuryItem),
     };
 
 
