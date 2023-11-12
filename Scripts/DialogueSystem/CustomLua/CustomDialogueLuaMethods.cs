@@ -1,3 +1,4 @@
+using System;
 using PixelCrushers.DialogueSystem;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public class CustomDialogueLuaMethods : MonoBehaviour
     {
         Lua.RegisterFunction(nameof(InventoryContainsItem), this, SymbolExtensions.GetMethodInfo(() => InventoryContainsItem((double)0, (double)0)));
         Lua.RegisterFunction(nameof(InventoryRemoveItem), this, SymbolExtensions.GetMethodInfo(() => InventoryRemoveItem((double)0, (double)0)));
+        Lua.RegisterFunction(nameof(InventoryRemoveItemsOfType), this, SymbolExtensions.GetMethodInfo(() => InventoryRemoveItemsOfType((double)0)));
         // Lua.RegisterFunction(nameof(ContainsEmptySpace), this, SymbolExtensions.GetMethodInfo(() => ContainsEmptySpace()));
     }
 
@@ -18,7 +20,7 @@ public class CustomDialogueLuaMethods : MonoBehaviour
     private bool InventoryContainsItem(double itemId, double amount) // Condition
     {
         var inventory = GameManager.Instance.Player.Inventory;
-        return inventory.ContainsItem((int)itemId, (int)amount);
+        return inventory.ContainsItem((int)itemId, (int)amount, out var _);
     }
 
 
@@ -28,10 +30,11 @@ public class CustomDialogueLuaMethods : MonoBehaviour
         return inventory.TryRemoveItem((int)itemId, (int)amount);
     }
 
-    // private bool ContainsEmptySpace()
-    // {
-    //     
-    // }
+    private bool InventoryRemoveItemsOfType(double itemId)
+    {
+        var inventory = GameManager.Instance.Player.Inventory;
+        return inventory.TryRemoveAllItemsOfType((int)itemId);
+    }
 
 }
 
