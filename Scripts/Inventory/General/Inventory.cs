@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using Language.Lua;
 using UnityEngine;
 
 namespace InventorySystem
 {
-
+[AddComponentMenu("Inventory/Inventory")]
 public class Inventory : MonoBehaviour
 {
+    /// <summary>
+    /// Representation of entity's items. TODO: Dictionary.
+    /// </summary>
     [field:SerializeField] public List<InventorySlot> InventorySlots { get; private set; } = new List<InventorySlot>();
 
     public event EventHandler InventoryChangedEventHandler; // Use InventoryEventArgs class below.
@@ -15,9 +19,11 @@ public class Inventory : MonoBehaviour
 
     public void AddItem(InventoryItem item, int amount)
     {
-        var (contained, index) = ContainsItemWhere(item);
+        ContainsItemWhere(item, out var contained, out var index);
+
         InventorySlot currentSlot;
         int prevAmount = 0;
+
         if (contained) // Add amount
         {
             currentSlot = InventorySlots[index];
@@ -39,14 +45,20 @@ public class Inventory : MonoBehaviour
     /// </summary>
     /// <param name="item">Item to check</param>
     /// <returns></returns>
-    private (bool, int) ContainsItemWhere(InventoryItem item)
+    private void ContainsItemWhere(InventoryItem item, out bool contain, out int index)
     {
         for (int i = 0; i < InventorySlots.Count; i++)
         {
-            if (InventorySlots[i].Item == item) { return (true, i); }
+            if (InventorySlots[i].Item == item) 
+            {
+                contain = true;
+                index = i;
+                return;
+            }
         }
 
-        return (false, 0);
+        contain = false;
+        index = 0;
     }
     
 
@@ -55,13 +67,39 @@ public class Inventory : MonoBehaviour
     /// </summary>
     /// <param name="item">Item to check</param>
     /// <returns></returns>
-    public bool ContainsItem(InventoryItem item)
+    public bool ContainsItem(InventoryItem item, int amount, out InventorySlot findedSlot)
     {
-        for (int i = 0; i < InventorySlots.Count; i++)
+        foreach (var slot in InventorySlots)
         {
-            if (InventorySlots[i].Item == item) { return true; }
+            if (slot.Item == item && slot.Amount >= amount) 
+            {
+                findedSlot = slot;
+                return true;
+            }
         }
 
+        findedSlot = null;
+        return false;
+    }
+
+
+    /// <summary>
+    /// Return true if inventory contains item with given ID.
+    /// </summary>
+    /// <param name="id">Item id to check</param>
+    /// <returns></returns>
+    public bool ContainsItem(int id, int amount, out InventorySlot findedSlot)
+    {
+        foreach (var slot in InventorySlots)
+        {
+            if (slot.Item.ID == id && slot.Amount >= amount)
+            {
+                findedSlot = slot;
+                return true;
+            }
+        }
+
+        findedSlot = null;
         return false;
     }
 
@@ -72,21 +110,61 @@ public class Inventory : MonoBehaviour
     /// <param name="item">Item to remove</param>
     /// <param name="amount">Amount to remove</param>
     /// <returns></returns>
-    public bool RemoveItem(InventoryItem item, int amount)
+    public bool TryRemoveItem(InventoryItem item, int amount)
     {
-        var (contained, index) = ContainsItemWhere(item);
+        ContainsItemWhere(item, out var contained, out var index);
+        
         InventorySlot currentSlot = InventorySlots[index];
 
         if (!contained || currentSlot.Amount < amount) { return false; } // Failed removing.
 
-        amount = -amount; // We need to distract.
-        currentSlot.ChangeAmount(amount);
-        if (currentSlot.Amount == 0) { InventorySlots.Remove(currentSlot); }
-        
-        var inventoryEventArgs = new InventoryEventArgs(currentSlot, amount, currentSlot.Amount);
-        InventoryChangedEventHandler?.Invoke(this, inventoryEventArgs);
+        RemoveItem(currentSlot, amount);
 
         return true;
+    }
+
+
+    /// <summary>
+    /// Remove item with given ID from inventory. True if succes removing, false if failed (no item / too big amount).
+    /// </summary>
+    /// <param name="id">Item's ID to remove</param>
+    /// <returns></returns>
+    public bool TryRemoveItem(int id, int amount)
+    {
+        if (ContainsItem(id, amount, out var slot))
+        {
+            RemoveItem(slot, amount);
+            return true;
+        }   
+
+        return false;
+    }
+
+    /// <summary>
+    /// Removes all items of given id and return result of deleting.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public bool TryRemoveAllItemsOfType(int id)
+    {
+        if (ContainsItem(id, 1, out var slot))
+        {
+            RemoveItem(slot, slot.Amount);
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private void RemoveItem(InventorySlot slot, int amount)
+    {
+        amount = -amount; // We need to distract.
+        slot.ChangeAmount(amount);
+        if (slot.Amount == 0) { InventorySlots.Remove(slot); }
+        
+        var inventoryEventArgs = new InventoryEventArgs(slot, amount, slot.Amount);
+        InventoryChangedEventHandler?.Invoke(this, inventoryEventArgs);
     }
     
 }
