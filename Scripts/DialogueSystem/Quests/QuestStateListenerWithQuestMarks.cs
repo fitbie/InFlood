@@ -59,6 +59,9 @@ public class QuestStateListenerWithQuestMarks : QuestStateListener
     for (int i = 0; i < questStateTrackMarks.Length; i++)
     {
         var questStateTrackMark = questStateTrackMarks[i];
+
+        if (questState != QuestState.Active) { questStateTrackMark.questMark.StopTracking(); continue; }
+
         if (((questState & questStateTrackMark.questState) != 0) && questStateTrackMark.condition.IsTrue(null))
         {
             if (!m_suppressOnEnterStateEvent)
@@ -73,9 +76,12 @@ public class QuestStateListenerWithQuestMarks : QuestStateListener
 
     // Check quest entry states:
     for (int i = 0; i < questEntryStateTrackMarks.Length; i++)
-    {
+    {   
         var quesEntrytStateTrackMark = questEntryStateTrackMarks[i];
         var questEntryState = QuestLog.GetQuestEntryState(questName, quesEntrytStateTrackMark.entryNumber);
+
+        if (questEntryState != QuestState.Active) { quesEntrytStateTrackMark.questMark.StopTracking(); continue; }
+
         if (((questEntryState & quesEntrytStateTrackMark.questState) != 0) && quesEntrytStateTrackMark.condition.IsTrue(null))
         {
             if (!m_suppressOnEnterStateEvent)
