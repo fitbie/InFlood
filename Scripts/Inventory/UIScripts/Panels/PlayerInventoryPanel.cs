@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace InventorySystem
 {
-
+[AddComponentMenu("Inventory/Player Inventory Panel")]
 public class PlayerInventoryPanel : InventoryPanelController
 {
     public override void Initialize()

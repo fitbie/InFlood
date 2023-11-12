@@ -7,6 +7,7 @@ namespace InventorySystem
 /// <summary>
 /// This class builds a UI panel of merchant items in the player's inventory, since the merchant has a separate inventory.
 /// </summary>
+[AddComponentMenu("Inventory/Player Panel For Merchant Slots")]
 public class InventoryMerchantPanel : InventoryPanelController
 {
     public override void Initialize()

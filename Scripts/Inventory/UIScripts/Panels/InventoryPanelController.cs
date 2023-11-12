@@ -8,6 +8,7 @@ namespace InventorySystem
 /// <summary>
 /// Base UI inventory panel class to derive from.
 /// </summary>
+[AddComponentMenu("Inventory/Base Inventory Panel")]
 public class InventoryPanelController : MonoBehaviour
 {
     [field:SerializeField] public Inventory Inventory { get; protected set; } // Need to get acces in children.
