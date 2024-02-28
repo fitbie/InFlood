@@ -19,17 +19,17 @@ namespace InFlood.Entities.ActionSystem
         /// <summary>
         /// Raised when handle start handling new StatusEffectData.
         /// </summary>
-        public event Action<StatusEffectData> OnEffectApplied = (e) => Debug.Log($"Handler Applied {e}");
+        public event Action<StatusEffectData> OnEffectApplied;
 
         /// <summary>
         /// Raised when any StatusEffectData changed, e.g. CurrentTime timer or Concatenate new effect to existing.
         /// </summary>
-        public event Action<StatusEffectData> OnEffectChanged = (e) => Debug.Log($"Handler Changed {e}");
+        public event Action<StatusEffectData> OnEffectChanged;
 
         /// <summary>
         /// Raised when effect's lifetime is over, or canceled.
         /// </summary>
-        public event Action<StatusEffectData> OnEffectReverted = (e) => Debug.Log($"Handler Revert {e}");
+        public event Action<StatusEffectData> OnEffectReverted;
 
         /// <summary>
         /// Pass here StatusEffectData instance to starts its handling process.
